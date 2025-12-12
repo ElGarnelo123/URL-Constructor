@@ -58,10 +58,20 @@ function buildWorkerUrl(rawApiUrl, workerType) {
   const parsed = safeParseUrl(rawApiUrl);
   if (!parsed) return { url: "", error: "Invalid URL. Please paste a valid api.php link." };
 
+  // 1. Extract the account ID before we wipe the params
+  const account = parsed.searchParams.get("account");
+
+  // 2. Wipe ALL query parameters and hash to get a clean slate
+  // This removes 'subject', 'param', 'module', or anything else unwanted
+  parsed.search = ""; 
   parsed.hash = "";
+
+  // 3. Re-add only the strict essentials
+  if (account) {
+    parsed.searchParams.set("account", account);
+  }
   parsed.searchParams.set("requestType", "worker");
   parsed.searchParams.set("type", workerType);
-  parsed.searchParams.delete("subject");
 
   return { url: parsed.toString(), error: "" };
 }
